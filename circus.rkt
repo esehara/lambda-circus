@@ -1,5 +1,17 @@
 #lang racket
 
+(provide beta->)
+(provide beta1->)
+(provide normal-order1->)
+
+(define (normal-order1-> l-term)
+  (if (beta1? l-term) (beta1-> l-term)
+      (let* ([prev-body (take l-term 2)]
+             [body (filter lambda-not-dot? (third l-term))]
+             [body-beta1 (beta1-> body)])
+        (append prev-body body-beta1))))
+        
+          
 (define (beta-> l-term)
   (simple-loop-beta-check '() l-term))
 
@@ -10,42 +22,56 @@
               (list->string prev-term)))
       (with-handlers ([exn:fail? (lambda (x) next-term)])
         (simple-loop-beta-check next-term (beta1-> next-term)))))
-  
+
+(define (beta1? l-term)
+  (and (list? (car l-term))
+   (or (not (lambda-type? (car l-term)))
+       (null? (car l-term)))))
+
 (define (beta1-> l-term)
-  (if (or (not (lambda-type? (car l-term)))
-          (null? (car l-term)))
-      (raise
-       (string-append "This form is already beta nomal form:" (list->string l-term)))
+  (if (beta1? l-term) l-term
       (apply->lambda (car l-term) (cdr l-term))))
 
 (define (lambda-type? l) (symbol=? '& (car l)))
+(define (lambda-not-dot? x)
+  (or (not (symbol? x))
+      (not (symbol=? 'dot x))))
 
 (define (apply->lambda l-term params)
   (if (null? params) l-term
       (let* ([param-name (second l-term)]
-             [body       (third  l-term)])
-        (filter (lambda (x)
-                  (or (not (symbol? x))
-                      (not (symbol=? 'dot x))))
-                (append (replace-node body param-name (car params)) (cdr params))))))
+             [body       (third  l-term)]
+             [replace-result (replace-node body param-name (car params))])
+        (filter lambda-not-dot?
+                (append
+                 (if (symbol? replace-result)
+                     (list replace-result) replace-result)
+                  (cdr params))))))
 
 (define (replace-node body param-name replace)
   (replace-node-process body '() param-name replace))
 
 (define (replace-node-process list-process result param-name replace)
   (cond [(null? list-process) result]
-        [(list? (car list-process))
+        [(and
+          (list? list-process)
+          (list? (car list-process)))
          (let ([list-result 
                 (list (replace-node (car list-process) param-name replace))])
            (replace-node-process (cdr list-process)
                                  (append result list-result)
                                  param-name replace))]
-        [else (let* ([target (car list-process)]
+        [else (let* ([target (if
+                              (list? list-process)
+                              (car list-process)
+                              list-process)]
                      [result-symbol
                       (if (symbol=? param-name target) replace target)])
-                (replace-node-process (cdr list-process)
+                (if (list? list-process)
+                    (replace-node-process (cdr list-process)
                                       (append result (list result-symbol))
-                                      param-name replace))]))
+                                      param-name replace)
+                    result-symbol))]))
 
 
 (module+ test
