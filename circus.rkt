@@ -83,39 +83,5 @@
 
   ;; replace node valiables
   (check-equal? (replace-node '(a b c) 'a 'N) '(N b c))
-  (check-equal? (replace-node '(a b (a b c) c) 'b 'M) '(a M (a M c) c)) 
-  
-  ;; beta-reduction step by step check
-
-  ;; (λx.x) N -- beta1 -> N
-  (check-equal? (beta1-> '((& x (dot x)) N)) '(N))
-
-  ;; (λx.x(xy)N -- beta1 -> N(Ny)
-  (check-equal? (beta1-> '((& x (dot x (x y))) N)) '(N (N y)))
-
-  ;; (λx.(λy.yx)z)v -- beta1 --> (λy.yu)z -- beta1 --> (zu)
-  (check-equal? (beta1-> '((& x ((& y (dot y x)) z)) u)) '((& y (dot y u)) z))
-  (check-equal? (beta1-> (beta1-> '((& x ((& y (dot y x)) z)) u))) '(z u))
-
-  ;; (λx.y)N -- beta1 --> y
-  (check-equal? (beta1-> '((& x (dot y)) N)) '(y))
-
-  ;; (λx.xx)(λx.xx) -- beta1 --> (λx.xx)(λx.xx)
-  (check-equal? (beta1->
-                 '((& x (dot x x)) (& x (dot x x))))
-                 '((& x (dot x x)) (& x (dot x x)))) 
-
-  ;; (λx.xxy)(λx.xxy) -- beta1 --> (λx.xxy)(λ.xxy)y
-  (check-equal? (beta1->
-                 '((& x (dot x x y)) (& x (dot x x y))))
-                 '((& x (dot x x y)) (& x (dot x x y)) y))
-  
-  ;; (λx.xxy)(λx.xxy)y -- beta1 --> (λx.xxy)(λ.xxy)yy
-  (check-equal? (beta1->
-                 '((& x (dot x x y)) (& x (dot x x y)) y))
-                 '((& x (dot x x y)) (& x (dot x x y)) y y))
-
-  ;; beta directly step check
-  (check-equal? (beta-> '((& x ((& y (dot y x)) z)) u)) '(z u))
-
+  (check-equal? (replace-node '(a b (a b c) c) 'b 'M) '(a M (a M c) c))
   )
