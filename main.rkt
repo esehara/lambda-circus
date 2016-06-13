@@ -75,7 +75,7 @@
 
   ;; normal order
   (check-equal? (normal-order1-> '(& z (dot (& x x) z))) '(& z z))
-
+  (check-equal? (normal-order1-> (normal-order1-> '((& x x) (& z (dot (& x x) z))))) '(& z z))
   )
 
 (module+ main

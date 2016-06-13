@@ -5,28 +5,27 @@
 (provide normal-order1->)
 
 (define (normal-order1-> l-term)
-  (if (beta1? l-term) (beta1-> l-term)
+  (if (not (beta1? l-term)) (beta1-> l-term)
       (let* ([prev-body (take l-term 2)]
              [body (filter lambda-not-dot? (third l-term))]
              [body-beta1 (beta1-> body)])
         (append prev-body body-beta1))))
-        
-          
+                  
 (define (beta-> l-term)
   (simple-loop-beta-check '() l-term))
 
 (define (simple-loop-beta-check prev-term next-term)
-  (if (equal? prev-term next-term)
-      (raise (string-append
-              "This beta reduction is infinity:"
-              (list->string prev-term)))
-      (with-handlers ([exn:fail? (lambda (x) next-term)])
-        (simple-loop-beta-check next-term (beta1-> next-term)))))
+  (if (equal? prev-term next-term) prev-term
+      (simple-loop-beta-check next-term (beta1-> next-term))))
+
+(define (get-lambda-symbol l-term)
+  (if (list? (car l-term)) (car l-term) l-term))
 
 (define (beta1? l-term)
-  (and (list? (car l-term))
-   (or (not (lambda-type? (car l-term)))
-       (null? (car l-term)))))
+  (or
+   (not (lambda-type? (get-lambda-symbol l-term)))
+   (and (symbol? (car l-term)) (null? (drop l-term 3)))
+   (null? (car l-term))))
 
 (define (beta1-> l-term)
   (if (beta1? l-term) l-term
@@ -38,15 +37,15 @@
       (not (symbol=? 'dot x))))
 
 (define (apply->lambda l-term params)
-  (if (null? params) l-term
-      (let* ([param-name (second l-term)]
+  (cond [(null? params) l-term]
+        [else (let* ([param-name (second l-term)]
              [body       (third  l-term)]
              [replace-result (replace-node body param-name (car params))])
         (filter lambda-not-dot?
                 (append
                  (if (symbol? replace-result)
                      (list replace-result) replace-result)
-                  (cdr params))))))
+                  (cdr params))))]))
 
 (define (replace-node body param-name replace)
   (replace-node-process body '() param-name replace))
