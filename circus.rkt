@@ -29,7 +29,9 @@
 
 (define (beta1-> l-term)
   (if (beta1? l-term) l-term
-      (apply->lambda (car l-term) (cdr l-term))))
+      (let ([result (apply->lambda (car l-term) (cdr l-term))])
+        (if (and (list? (car result))
+                 (list? (caar result))) (car result) result))))
 
 (define (lambda-type? l) (symbol=? '& (car l)))
 (define (lambda-not-dot? x)

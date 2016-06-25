@@ -64,7 +64,10 @@
                  '((& x (dot x x y)) (& x (dot x x y)) y))
                  '((& x (dot x x y)) (& x (dot x x y)) y y))
 
-  ;;
+  ;; (λx.x)((λx.x)(λz.(λx.z) z)) -- beta1 --> (λx.x)(λz.(λx.x) z)
+  (check-equal? (beta1-> '((& x (dot x)) ((& x (dot x)) (& z (dot ((& x (dot x)) z))))))
+                '((& x (dot x)) (& z (dot (( & x (dot x)) z)))))
+  
   ;; beta directly step check
   ;; ------------------------
   (check-equal? (beta-> '((& x ((& y (dot y x)) z)) u)) '(z u))
