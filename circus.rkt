@@ -4,12 +4,17 @@
 (provide beta1->)
 (provide normal-order1->)
 
+(define (fix-reduction l-term)
+  (if (and (list? (car l-term))
+           (= 1 (length l-term)))
+      (car l-term) l-term))
+
 (define (normal-order1-> l-term)
-  (if (not (beta1? l-term)) (beta1-> l-term)
+  (if (not (beta1? l-term)) (fix-reduction (beta1-> l-term))
       (let* ([prev-body (take l-term 2)]
              [body (filter lambda-not-dot? (third l-term))]
              [body-beta1 (beta1-> body)])
-        (append prev-body body-beta1))))
+            (append prev-body body-beta1))))
                   
 (define (beta-> l-term)
   (simple-loop-beta-check '() l-term))
@@ -33,7 +38,18 @@
         (if (and (list? (car result))
                  (list? (caar result))) (car result) result))))
 
-(define (lambda-type? l) (symbol=? '& (car l)))
+(define (lambda-type? l)
+  (and (symbol? (car l)) (symbol=? '& (car l))))
+
+(define (lambda-param l)
+  (cond [(and
+          (symbol? (first l))
+          (< 3 (length l))
+          (symbol=? (first l) 'dot)) (third l)]
+        [(and
+          (symbol? (first l))
+          (symbol=? (first l) '&)) (second l)]))
+
 (define (lambda-not-dot? x)
   (or (not (symbol? x))
       (not (symbol=? 'dot x))))
@@ -42,12 +58,16 @@
   (cond [(null? params) l-term]
         [else (let* ([param-name (second l-term)]
              [body       (third  l-term)]
-             [replace-result (replace-node body param-name (car params))])
-        (filter lambda-not-dot?
-                (append
-                 (if (symbol? replace-result)
-                     (list replace-result) replace-result)
-                  (cdr params))))]))
+             [replace-result (if (and (lambda-type? (cdr body))
+                                      (symbol=? (lambda-param body) param-name))
+                                 body
+                                 (replace-node body param-name (car params)))])
+                (println param-name)
+                (filter lambda-not-dot?
+                        (append
+                         (if (symbol? replace-result)
+                             (list replace-result) replace-result)
+                         (cdr params))))]))
 
 (define (replace-node body param-name replace)
   (replace-node-process body '() param-name replace))
