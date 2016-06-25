@@ -13,7 +13,7 @@ This package is "Example lambda caluclation system about Beta Reduction System".
 
 @section{ Lambda syntax in Module }
 
-@itaric{Warning: I'm not native english writer.then, this sentence is probably very odd. :( ) } 
+@italic{Warning: I'm not native english writer.then, this sentence is probably very odd. :( ) } 
 
 In module, @bold{Lambda syntax} is:
 
