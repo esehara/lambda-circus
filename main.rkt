@@ -39,6 +39,9 @@
   ;; (λx.x) N -- beta1 -> N
   (check-equal? (beta1-> '((& x (dot x)) N)) '(N))
 
+  ;; (λx.(λx.x)) z -- beta1 -> λx
+  (check-equal? (beta1-> '((& x (dot & x (dot x))) z)) '(& x (dot x)))
+  
   ;; (λx.x(xy)N -- beta1 -> N(Ny)
   (check-equal? (beta1-> '((& x (dot x (x y))) N)) '(N (N y)))
 
