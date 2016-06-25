@@ -62,7 +62,6 @@
                                       (symbol=? (lambda-param body) param-name))
                                  body
                                  (replace-node body param-name (car params)))])
-                (println param-name)
                 (filter lambda-not-dot?
                         (append
                          (if (symbol? replace-result)
