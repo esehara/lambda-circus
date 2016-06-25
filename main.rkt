@@ -39,9 +39,9 @@
   ;; (λx.x) N -- beta1 -> N
   (check-equal? (beta1-> '((& x (dot x)) N)) '(N))
 
-  ;; (λx.(λx.x)) z -- beta1 -> λx
+  ;; (λx.(λx.x)) z -- beta1 -> λx.x
   (check-equal? (beta1-> '((& x (dot & x (dot x))) z)) '(& x (dot x)))
-  
+ 
   ;; (λx.x(xy)N -- beta1 -> N(Ny)
   (check-equal? (beta1-> '((& x (dot x (x y))) N)) '(N (N y)))
 
@@ -68,9 +68,17 @@
                  '((& x (dot x x y)) (& x (dot x x y)) y y))
 
   ;; (λx.x)((λx.x)(λz.(λx.z) z)) -- beta1 --> (λx.x)(λz.(λx.x) z)
-  (check-equal? (beta1-> '((& x (dot x)) ((& x (dot x)) (& z (dot ((& x (dot x)) z))))))
+  (check-equal? (beta1-> '((& y (dot y)) ((& x (dot x)) (& z (dot ((& x (dot x)) z))))))
                 '((& x (dot x)) (& z (dot (( & x (dot x)) z)))))
   
+  (check-equal? (beta1-> (beta1-> '((& y (dot y)) ((& x (dot x)) (& z (dot ((& x (dot x)) z)))))))
+                '(& z (dot (( & x (dot x)) z))))
+
+  (check-equal? (beta1-> (beta1-> (beta1-> '((& y (dot y)) ((& x (dot x)) (& z (dot ((& x (dot x)) z))))))))
+                '(& z (dot (( & x (dot x)) z))))
+
+  (check-equal? (beta-> '((& y (dot y)) ((& x (dot x)) (& z (dot ((& x (dot x)) z))))))
+                '(& z (dot (( & x (dot x)) z))))
   ;; beta directly step check
   ;; ------------------------
   (check-equal? (beta-> '((& x ((& y (dot y x)) z)) u)) '(z u))
@@ -80,8 +88,8 @@
   ;; =========================
 
   ;; normal order
-  (check-equal? (normal-order1-> '(& z (dot (& x x) z))) '(& z z))
-  (check-equal? (normal-order1-> (normal-order1-> '((& x x) (& z (dot (& x x) z))))) '(& z z))
+  (check-equal? (normal-order1-> '(& z (dot (& x (dot x)) z))) '(& z z))
+  (check-equal? (normal-order1-> (normal-order1-> '((& x (dot x)) (& z (dot (& x (dot x)) z))))) '(& z z))
   )
 
 (module+ main
