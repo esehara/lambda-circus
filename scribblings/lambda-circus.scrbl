@@ -23,7 +23,7 @@ In module, @bold{Lambda syntax} is:
 
 or
 
-@(rancketblock
+@(racketblock
   '(& x (x)))
 
 In Packeage, @racket['&] is a substitute for lambda.
@@ -58,14 +58,14 @@ Example:
 
 @defproc[(normal-order1-> [lambda-list list?]) normal-order-reducted]
 
-In this system, @packet[beta->] function adopt @bold{call-by-value} strategy. but, Reduction strategy has another strategy. Typycally @bold{normal order}.What's difference? See under code.
+In this system, @racket[beta->] function adopt @bold{call-by-value} strategy. but, Reduction strategy has another strategy. Typycally @bold{normal order}.What's difference? See under code.
 
 @(racketblock
   (normal-order1-> '(& z (dot (& x x) z)))
   ;;'(& z z)
   )
 
-@bold{normal order} demand reduction @racket['(dot & x x) z]. but, @{call-by-value} has not to reduce it.
+@bold{normal order} demand reduction @racket['(dot & x x) z]. but, @bold{call-by-value} has not to reduce it.
 
 @(racketblock
   (beta1-> '(& z (dot (& x x) z)))
