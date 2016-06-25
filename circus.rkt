@@ -35,8 +35,8 @@
 (define (beta1-> l-term)
   (if (beta1? l-term) l-term
       (let ([result (apply->lambda (car l-term) (cdr l-term))])
-        (if (and (list? (car result))
-                 (list? (caar result))) (car result) result))))
+        (fix-reduction (if (and (list? (car result))
+                 (list? (caar result))) (car result) result)))))
 
 (define (lambda-type? l)
   (and (symbol? (car l)) (symbol=? '& (car l))))
